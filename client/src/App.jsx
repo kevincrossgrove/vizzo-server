@@ -7,6 +7,7 @@ function App() {
   const [fetchingVideos, setFetchingVideos] = useState(false);
   const [videos, setVideos] = useState(null);
   const [channel, setChannel] = useState(null);
+  const [channelStatistics, setChannelStatistics] = useState(null);
 
   useEffect(() => {
     async function getMe() {
@@ -19,8 +20,6 @@ function App() {
 
     getMe();
   }, []);
-
-  console.log({ videos, channel });
 
   return (
     <div className="App" style={{ width: '100vw' }}>
@@ -40,7 +39,19 @@ function App() {
               {fetchingVideos ? 'Getting videos...' : 'Get Channel Videos'}
             </button>
           )}
-          {channel && <img src={channel.snippet.thumbnails.default.url} />}
+          {channel && (
+            <div className="channel-card">
+              <img src={channel.snippet.thumbnails.default.url} />
+              <div>
+                Videos: {channelStatistics.videoCount}
+                <br />
+                Subscribers: {channelStatistics.subscriberCount}
+                <br />
+                View Count: {channelStatistics.viewCount}
+                <br />
+              </div>
+            </div>
+          )}
           {Array.isArray(videos) &&
             videos.map((v) => (
               <div key={v.id.videoId} className="video-card">
@@ -48,7 +59,7 @@ function App() {
                   src={v.snippet.thumbnails.medium.url}
                   style={{ height: 'auto', width: 180 }}
                 />
-                <h2>{v.snippet.title}</h2>
+                <h2 dangerouslySetInnerHTML={{ __html: v.snippet.title }}></h2>
               </div>
             ))}
         </div>
@@ -64,10 +75,14 @@ function App() {
         withCredentials: true,
       });
 
-      const items = result.data.items;
+      const { videosData, channelStatistics } = result.data;
+      console.log(result.data);
+
+      const items = videosData.items;
 
       setVideos(items.filter((i) => i.id.kind === 'youtube#video'));
       setChannel(items.find((i) => i.id.kind === 'youtube#channel'));
+      setChannelStatistics(channelStatistics);
     } catch {
       setVideos(null);
     }

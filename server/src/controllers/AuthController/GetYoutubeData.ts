@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Request, Response } from 'express';
 import { GoogleRequest } from '../../utils/RequestUtils';
 
@@ -8,37 +7,25 @@ export async function GetYoutubeData(req: Request, res: Response) {
   try {
     try {
       // Fetch google user's youtube channels
-      const result: any = await GoogleRequest({
-        method: 'get',
-        url: 'https://youtube.googleapis.com/youtube/v3/channels',
-        options: { part: 'id', mine: true },
-        token: googleToken,
-      });
-      const channelID = result?.data?.items?.[0]?.id;
-
-      if (!channelID) {
-        return res.send('No channels were found.');
-      }
+      const channelID = await GetChannel(googleToken);
 
       const channelVideosResult = await GetChannelVideos(
         channelID,
         googleToken
       );
 
-      return res.send(channelVideosResult.data);
-
-      const id = result?.items?.[0]?.id;
-
-      const videoResult: any = await axios.get(
-        `https://www.googleapis.com/youtube/v3/videos/getRating?id=${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${googleToken}`,
-          },
-        }
+      const channelStatisticsResult = await GetChannelStatistics(
+        channelID,
+        googleToken
       );
 
-      console.log(videoResult);
+      return res.send({
+        videosData: channelVideosResult.data,
+        channelStatistics:
+          channelStatisticsResult?.data?.items?.[0]?.statistics,
+        channelID: channelID,
+        test: 'hello',
+      });
     } catch (err: any) {
       console.log(err);
       console.log({ err: err.response });
@@ -50,6 +37,24 @@ export async function GetYoutubeData(req: Request, res: Response) {
     console.log(err);
     res.send('Err');
   }
+}
+
+async function GetChannelStatistics(channelID: string, googleToken: string) {
+  const options = {
+    part: 'statistics',
+    id: channelID,
+  };
+
+  const channelLink = 'https://www.googleapis.com/youtube/v3/channels';
+
+  const channelStatistics = await GoogleRequest({
+    method: 'get',
+    url: channelLink,
+    options: options,
+    token: googleToken,
+  });
+
+  return channelStatistics;
 }
 
 // Using a channelID, get the videos
@@ -71,4 +76,17 @@ async function GetChannelVideos(channelId: string, googleToken: string) {
   });
 
   return videosResult;
+}
+
+async function GetChannel(googleToken: string) {
+  const result: any = await GoogleRequest({
+    method: 'get',
+    url: 'https://youtube.googleapis.com/youtube/v3/channels',
+    options: { part: 'id', mine: true },
+    token: googleToken,
+  });
+
+  const channelID = result?.data?.items?.[0]?.id;
+
+  return channelID || null;
 }
