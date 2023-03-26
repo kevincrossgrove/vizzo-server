@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import querystring from 'querystring';
 
 interface GoogleRequestProps {
@@ -6,6 +6,7 @@ interface GoogleRequestProps {
   url: string;
   options?: { [key: string]: any };
   token: string;
+  useApiKey?: boolean;
 }
 
 export async function GoogleRequest({
@@ -13,18 +14,27 @@ export async function GoogleRequest({
   url,
   options,
   token,
+  useApiKey,
 }: GoogleRequestProps) {
-  const queryParams = options ? querystring.stringify(options) : null;
-
-  if (!token) {
+  if (!useApiKey && !token) {
     return Promise.reject('Missing google access token.');
   }
+  if (useApiKey && options) {
+    options.key = process.env.GOOGLE_API_KEY;
+  }
 
-  return axios({
+  const queryParams = options ? querystring.stringify(options) : null;
+
+  const axiosConfig: AxiosRequestConfig = {
     method: method,
     url: queryParams ? `${url}?${queryParams}` : url,
-    headers: {
+  };
+
+  if (!useApiKey) {
+    axiosConfig.headers = {
       Authorization: `Bearer ${token}`,
-    },
-  });
+    };
+  }
+
+  return axios(axiosConfig);
 }
