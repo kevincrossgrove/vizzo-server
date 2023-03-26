@@ -1,31 +1,31 @@
 import axios from 'axios';
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-
-const env = process.env as any;
+import { GoogleRequest } from '../../utils/RequestUtils';
 
 export async function GetYoutubeData(req: Request, res: Response) {
-  const authCookie = req.cookies[env.COOKIE_NAME];
-
-  if (!authCookie || !env.JWT_SECRET) return res.send('');
+  const googleToken = req.cookies['google_access_token'];
 
   try {
-    const decoded = jwt.verify(authCookie, env.JWT_SECRET);
-
     try {
-      //&access_token=${req.cookies['google_access_token']}
-      const result: any = await axios.get(
-        `https://youtube.googleapis.com/youtube/v3/channels?part=id&mine=true`,
-        {
-          headers: {
-            Authorization: `Bearer ${req.cookies['google_access_token']}`,
-          },
-        }
+      // Fetch google user's youtube channels
+      const result: any = await GoogleRequest({
+        method: 'get',
+        url: 'https://youtube.googleapis.com/youtube/v3/channels',
+        options: { part: 'id', mine: true },
+        token: googleToken,
+      });
+      const channelID = result?.data?.items?.[0]?.id;
+
+      if (!channelID) {
+        return res.send('No channels were found.');
+      }
+
+      const channelVideosResult = await GetChannelVideos(
+        channelID,
+        googleToken
       );
 
-      console.log({ foundData: result.data });
-
-      return res.send(result.data);
+      return res.send(channelVideosResult.data);
 
       const id = result?.items?.[0]?.id;
 
@@ -33,7 +33,7 @@ export async function GetYoutubeData(req: Request, res: Response) {
         `https://www.googleapis.com/youtube/v3/videos/getRating?id=${id}`,
         {
           headers: {
-            Authorization: `Bearer ${req.cookies['google_access_token']}`,
+            Authorization: `Bearer ${googleToken}`,
           },
         }
       );
@@ -46,11 +46,29 @@ export async function GetYoutubeData(req: Request, res: Response) {
         data: 'error!',
       });
     }
-
-    // console.log('decoded', decoded);
-    return res.send('yay');
   } catch (err) {
     console.log(err);
     res.send('Err');
   }
+}
+
+// Using a channelID, get the videos
+async function GetChannelVideos(channelId: string, googleToken: string) {
+  const options = {
+    part: 'snippet',
+    order: 'date',
+    channelId: channelId,
+    maxResults: 20,
+  };
+
+  const searchVideosLink = 'https://www.googleapis.com/youtube/v3/search';
+
+  const videosResult = await GoogleRequest({
+    method: 'get',
+    url: searchVideosLink,
+    options: options,
+    token: googleToken,
+  });
+
+  return videosResult;
 }

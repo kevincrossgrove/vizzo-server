@@ -26,7 +26,5 @@ export default function GetGoogleAuthURL(_: Request, res: Response) {
 
   const finalURL = `${rootURL}?${querystring.stringify(options)}`;
 
-  console.log({ finalURL });
-
   return res.redirect(finalURL);
 }

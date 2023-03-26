@@ -1,4 +1,5 @@
 import express from 'express';
+import GetCurrentGoogleUser from '../controllers/AuthController/GetCurrentGoogleUser';
 import GetGoogleAuthURL from '../controllers/AuthController/GetGoogleAuthURL';
 import { GetYoutubeData } from '../controllers/AuthController/GetYoutubeData';
 import HandleGoogleOAuth from '../controllers/AuthController/HandleGoogleOAuth';
@@ -12,6 +13,8 @@ AuthRouter.get('/google/url', GetGoogleAuthURL);
 AuthRouter.get(`/google`, HandleGoogleOAuth);
 
 // Getting the current user
-AuthRouter.get('/me', GetYoutubeData);
+AuthRouter.get('/me', GetCurrentGoogleUser);
+
+AuthRouter.get('/me/videos', GetYoutubeData);
 
 export default AuthRouter;
