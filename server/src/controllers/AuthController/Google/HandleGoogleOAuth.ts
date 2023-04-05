@@ -1,7 +1,7 @@
 import axios from 'axios';
 import querystring from 'querystring';
 import { Request, Response } from 'express';
-import { Google_Redirect_URL } from '../../constants/Constants';
+import { Google_Redirect_URL } from '../../../constants/Constants';
 import jwt from 'jsonwebtoken';
 
 const env: any = process.env;

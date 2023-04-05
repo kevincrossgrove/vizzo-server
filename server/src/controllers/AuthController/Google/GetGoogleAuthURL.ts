@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import querystring from 'querystring';
-import { Google_Redirect_URL } from '../../constants/Constants';
+import { Google_Redirect_URL } from '../../../constants/Constants';
 
 /**
  * GetGoogleAuthURL - Redirects the user to the Google OAuth Consent page

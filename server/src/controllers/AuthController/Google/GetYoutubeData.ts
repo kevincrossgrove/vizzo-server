@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { GetChannel } from '../../utils/YoutubeUtils/GetChannel';
-import { GetChannelStatistics } from '../../utils/YoutubeUtils/GetChannelStatistics';
-import { GetChannelVideos } from '../../utils/YoutubeUtils/GetChannelVideos';
+import { GetChannel } from '../../../utils/YoutubeUtils/GetChannel';
+import { GetChannelStatistics } from '../../../utils/YoutubeUtils/GetChannelStatistics';
+import { GetChannelVideos } from '../../../utils/YoutubeUtils/GetChannelVideos';
 
 export async function GetYoutubeData(req: Request, res: Response) {
   const googleToken = req.cookies['google_access_token'];
