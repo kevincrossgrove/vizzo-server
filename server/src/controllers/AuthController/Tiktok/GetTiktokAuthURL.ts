@@ -19,10 +19,10 @@ export default function GetTiktokAuthURL(_: Request, res: Response) {
   const rootURL = 'https://www.tiktok.com/auth/authorize/';
   const options = {
     client_key: process.env.TIKTOK_CLIENT_KEY,
-    scope: ['user.info.basic'].join(','),
     redirect_uri: `${process.env.SERVER_ROOT_URI}/${TikTok_Redirect_URL}`,
     state: csrfState,
     response_type: 'code',
+    scope: ['user.info.basic'].join(','),
   };
 
   const finalURL = `${rootURL}?${querystring.stringify(options)}`;

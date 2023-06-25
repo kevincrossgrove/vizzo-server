@@ -2,11 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import AuthRouter from './routers/AuthRouter';
+import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
+import MongoDBDatabase from './lib/database/MongoDBDatabase';
+import TestRouter from './routers/TestRouter';
 
 const env = process.env as any;
 
 if (env.NODE_ENV !== 'production') {
-  require('dotenv').config();
+  dotenv.config();
 }
 
 const app = express();
@@ -22,11 +26,21 @@ app.use(
 
 app.use(cookieParser());
 
+// PORT
+const PORT = 5000;
+
+// Setup MongoDB connection with Vizzo DB.
+const mongoDbClient = new MongoClient(process.env.MONGODB_CONNECTION_STRING);
+const mongoDB = new MongoDBDatabase(mongoDbClient, process.env.MONGODB_DB_NAME);
+
+mongoDB.init();
+
+(global as any).db = mongoDB;
+
 // Use AuthenticationRouter
 app.use('/auth', AuthRouter);
 
-// PORT
-const PORT = 5000;
+app.use('/test', TestRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT: ${PORT}`);

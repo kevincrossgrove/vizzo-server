@@ -77,8 +77,17 @@ function App() {
           />
         )}
       </>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <button onClick={testMongoDB}>Test MongoDB Document Creation</button>
+      </div>
     </div>
   );
+
+  async function testMongoDB() {
+    const result = await axios.get('http://localhost:5000/test/test');
+
+    console.log(result);
+  }
 
   async function fetchVideos() {
     setFetchingVideos(true);
